@@ -52,6 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--inference_batch_size', type=int, default=1)
     parser.add_argument('--inference_n_batches', type=int, default=-1)
     parser.add_argument('--save_flow', action='store_true', help='save predicted flows to file')
+    parser.add_argument('--save_prefeat', action='store_true', help='save pretrained features to file')
 
     parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
     parser.add_argument('--log_frequency', '--summ_iter', type=int, default=1, help="Log every n batches")
@@ -180,6 +181,7 @@ if __name__ == '__main__':
                 else :
                     return loss_values, output
 
+        pdb.set_trace()
         model_and_loss = ModelAndLoss(args)
 
         block.log('Effective Batch Size: {}'.format(args.effective_batch_size))
@@ -345,6 +347,33 @@ if __name__ == '__main__':
     def inference(args, epoch, data_loader, model, offset=0):
 
         model.eval()
+
+        if args.save_prefeat and args.model=='FlowNet2':
+            feat_folder = 'prefeat_kitti_odo'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            feat_folder = 'prefeat_kitti_odo/FlowNet2'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
+                feat_folder = 'prefeat_kitti_odo/FlowNet2/{}'.format(_seq)
+                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+        
+        if args.save_prefeat and args.model=='FlowNet2C':
+            feat_folder = 'prefeat_kitti_odo'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            feat_folder = 'prefeat_kitti_odo/FlowNet2C'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
+                feat_folder = 'prefeat_kitti_odo/FlowNet2C/{}'.format(_seq)
+                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+        
+        if args.save_prefeat and args.model=='FlowNet2S':
+            feat_folder = 'prefeat_kitti_odo'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            feat_folder = 'prefeat_kitti_odo/FlowNet2S'
+            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
+                feat_folder = 'prefeat_kitti_odo/FlowNet2S/{}'.format(_seq)
+                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
         
         if args.save_flow or args.render_validation:
             flow_folder = "{}/inference/{}.epoch-{}-flow-field".format(args.save,args.name.replace('/', '.'),epoch)
@@ -364,7 +393,10 @@ if __name__ == '__main__':
 
         statistics = []
         total_loss = 0
-        for batch_idx, (data, target) in enumerate(progress):
+        for batch_idx, (data, target, outname) in enumerate(progress):
+            # outname: e.g. [['00-000000_000001']]
+            outname = outname[0][0] # '00-000000_000001'
+            outseq  = outname.split('-')[0] # '00'
             if args.cuda:
                 data, target = [d.cuda(non_blocking=True) for d in data], [t.cuda(non_blocking=True) for t in target]
             data, target = [Variable(d) for d in data], [Variable(t) for t in target]

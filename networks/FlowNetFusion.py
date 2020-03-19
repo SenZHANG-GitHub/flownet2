@@ -63,5 +63,5 @@ class FlowNetFusion(nn.Module):
         out_interconv0 = self.inter_conv0(concat0)
         flow0       = self.predict_flow0(out_interconv0)
 
-        return flow0
+        return flow0, out_conv2, flow2, concat0, out_interconv0
 

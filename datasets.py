@@ -350,6 +350,13 @@ class ImagesFromFolder(data.Dataset):
     index = index % self.size
     print('index: {}/{}'.format(index, len(self)))
 
+    subseq_1 = self.image_list[index][0].split('/')[-3] # e.g. 00
+    subseq_2 = self.image_list[index][1].split('/')[-3] # e.g. 00
+    imgind_1 = self.image_list[index][0].split('/')[-1].replace('.png', '') # e.g. 000000
+    imgind_2 = self.image_list[index][1].split('/')[-1].replace('.png', '') # e.g. 000001
+    assert subseq_1 == subseq_2
+    out_name = '{}-{}_{}'.format(subseq_1, imgind_1, imgind_2) # 00-000000_000001
+
     img1 = frame_utils.read_gen(self.image_list[index][0])
     img2 = frame_utils.read_gen(self.image_list[index][1])
 
@@ -364,7 +371,7 @@ class ImagesFromFolder(data.Dataset):
     images = np.array(images).transpose(3,0,1,2)
     images = torch.from_numpy(images.astype(np.float32))
 
-    return [images], [torch.zeros(images.size()[0:1] + (2,) + images.size()[-2:])]
+    return [images], [torch.zeros(images.size()[0:1] + (2,) + images.size()[-2:])], [out_name]
 
   def __len__(self):
     return self.size * self.replicates

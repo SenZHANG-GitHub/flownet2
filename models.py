@@ -177,12 +177,12 @@ class FlowNet2(nn.Module):
 
         # concat img1 flownetsd, flownets2, norm_flownetsd, norm_flownets2, diff_flownetsd_img1, diff_flownets2_img1
         concat3 = torch.cat((x[:,:3,:,:], flownetsd_flow, flownets2_flow, norm_flownetsd_flow, norm_flownets2_flow, diff_flownetsd_img1, diff_flownets2_img1), dim=1)
-        flownetfusion_flow = self.flownetfusion(concat3)
+        flownetfusion_flow, fusion_out_conv2, fusion_flow2, fusion_concat0, fusion_out_interconv0 = self.flownetfusion(concat3)
 
         # if not flownetfusion_flow.volatile:
         #     flownetfusion_flow.register_hook(save_grad(self.args.grads, 'flownetfusion_flow'))
 
-        return flownetfusion_flow
+        return flownetfusion_flow, flownetc_flow2, concat1, flownets1_flow2, concat2, flownets2_flow2, concat3, fusion_out_conv2, fusion_flow2, fusion_concat0, fusion_out_interconv0
 
 class FlowNet2C(FlowNetC.FlowNetC):
     def __init__(self, args, batchNorm=False, div_flow=20):
@@ -222,11 +222,12 @@ class FlowNet2C(FlowNetC.FlowNetC):
         out_conv4 = self.conv4_1(self.conv4(out_conv3_1))
 
         out_conv5 = self.conv5_1(self.conv5(out_conv4))
-        out_conv6 = self.conv6_1(self.conv6(out_conv5))
+        out_conv6 = self.conv6(out_conv5)
+        out_conv6_1 = self.conv6_1(out_conv6)
 
-        flow6       = self.predict_flow6(out_conv6)
+        flow6       = self.predict_flow6(out_conv6_1)
         flow6_up    = self.upsampled_flow6_to_5(flow6)
-        out_deconv5 = self.deconv5(out_conv6)
+        out_deconv5 = self.deconv5(out_conv6_1)
 
         concat5 = torch.cat((out_conv5,out_deconv5,flow6_up),1)
 
@@ -250,7 +251,7 @@ class FlowNet2C(FlowNetC.FlowNetC):
         if self.training:
             return flow2,flow3,flow4,flow5,flow6
         else:
-            return self.upsample1(flow2*self.div_flow)
+            return self.upsample1(flow2*self.div_flow), out_conv6, out_conv6_1, flow6, flow6_up, concat2, flow2
 
 class FlowNet2S(FlowNetS.FlowNetS):
     def __init__(self, args, batchNorm=False, div_flow=20):
@@ -269,11 +270,12 @@ class FlowNet2S(FlowNetS.FlowNetS):
         out_conv3 = self.conv3_1(self.conv3(out_conv2))
         out_conv4 = self.conv4_1(self.conv4(out_conv3))
         out_conv5 = self.conv5_1(self.conv5(out_conv4))
-        out_conv6 = self.conv6_1(self.conv6(out_conv5))
+        out_conv6 = self.conv6(out_conv5)
+        out_conv6_1 = self.conv6_1(out_conv6)
 
-        flow6       = self.predict_flow6(out_conv6)
+        flow6       = self.predict_flow6(out_conv6_1)
         flow6_up    = self.upsampled_flow6_to_5(flow6)
-        out_deconv5 = self.deconv5(out_conv6)
+        out_deconv5 = self.deconv5(out_conv6_1)
         
         concat5 = torch.cat((out_conv5,out_deconv5,flow6_up),1)
         flow5       = self.predict_flow5(concat5)
@@ -296,7 +298,7 @@ class FlowNet2S(FlowNetS.FlowNetS):
         if self.training:
             return flow2,flow3,flow4,flow5,flow6
         else:
-            return self.upsample1(flow2*self.div_flow)
+            return self.upsample1(flow2*self.div_flow), out_conv6, out_conv6_1, flow6, flow6_up, concat2, flow2
 
 class FlowNet2SD(FlowNetSD.FlowNetSD):
     def __init__(self, args, batchNorm=False, div_flow=20):
