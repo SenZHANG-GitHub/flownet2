@@ -172,16 +172,20 @@ if __name__ == '__main__':
                 self.loss = args.loss_class(args, **kwargs)
                 
             def forward(self, data, target, inference=False ):
-                output = self.model(data)
-
+                # out_feats: dict of pretrained features to save
+                output, out_feats = self.model(data)
                 loss_values = self.loss(output, target)
 
                 if not inference :
                     return loss_values
                 else :
-                    return loss_values, output
+                    return loss_values, output, out_feats
 
-        pdb.set_trace()
+        # check eligibility of saving pre-features
+        if not args.inference: raise ValueError('only support inference mode for prefeats')
+        if args.model not in ['FlowNet2', 'FlowNet2C', 'FlowNet2S']:
+            raise ValueError('only support FlowNet2, FlowNet2C, FlowNet2S')
+
         model_and_loss = ModelAndLoss(args)
 
         block.log('Effective Batch Size: {}'.format(args.effective_batch_size))

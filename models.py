@@ -181,8 +181,22 @@ class FlowNet2(nn.Module):
 
         # if not flownetfusion_flow.volatile:
         #     flownetfusion_flow.register_hook(save_grad(self.args.grads, 'flownetfusion_flow'))
+        
+        out_feats = {
+            'flownetc_flow2':        flownetc_flow2,
+            'concat1':               concat1,
+            'flownets1_flow2':       flownets1_flow2,
+            'concat2':               concat2,
+            'flownets2_flow2':       flownets2_flow2,
+            'concat3':               concat3,
+            'fusion_out_conv2':      fusion_out_conv2,
+            'fusion_flow2':          fusion_flow2,
+            'fusion_concat0':        fusion_concat0,
+            'fusion_out_interconv0': fusion_out_interconv0
+        }
 
-        return flownetfusion_flow, flownetc_flow2, concat1, flownets1_flow2, concat2, flownets2_flow2, concat3, fusion_out_conv2, fusion_flow2, fusion_concat0, fusion_out_interconv0
+        return flownetfusion_flow, out_feats
+
 
 class FlowNet2C(FlowNetC.FlowNetC):
     def __init__(self, args, batchNorm=False, div_flow=20):
@@ -251,7 +265,15 @@ class FlowNet2C(FlowNetC.FlowNetC):
         if self.training:
             return flow2,flow3,flow4,flow5,flow6
         else:
-            return self.upsample1(flow2*self.div_flow), out_conv6, out_conv6_1, flow6, flow6_up, concat2, flow2
+            out_feats = {
+                'out_conv6':    out_conv6,
+                'out_conv6_1':  out_conv6_1,
+                'flow6':        flow6,
+                'flow6_up':     flow6_up,
+                'concat2':      concat2,
+                'flow2':        flow2
+            }
+            return self.upsample1(flow2*self.div_flow), out_feats
 
 class FlowNet2S(FlowNetS.FlowNetS):
     def __init__(self, args, batchNorm=False, div_flow=20):
@@ -298,7 +320,16 @@ class FlowNet2S(FlowNetS.FlowNetS):
         if self.training:
             return flow2,flow3,flow4,flow5,flow6
         else:
-            return self.upsample1(flow2*self.div_flow), out_conv6, out_conv6_1, flow6, flow6_up, concat2, flow2
+            out_feats = {
+                'out_conv6':   out_conv6,
+                'out_conv6_1': out_conv6_1,
+                'flow6':       flow6,
+                'flow6_up':    flow6_up,
+                'concat2':     concat2,
+                'flow2':       flow2
+            }
+            return self.upsample1(flow2*self.div_flow), out_feats
+
 
 class FlowNet2SD(FlowNetSD.FlowNetSD):
     def __init__(self, args, batchNorm=False, div_flow=20):
