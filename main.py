@@ -173,6 +173,7 @@ if __name__ == '__main__':
                 
             def forward(self, data, target, inference=False ):
                 # out_feats: dict of pretrained features to save
+                pdb.set_trace() # data.shape: torch.Size([1,3,2,320,1216])
                 output, out_feats = self.model(data)
                 loss_values = self.loss(output, target)
 
@@ -182,9 +183,9 @@ if __name__ == '__main__':
                     return loss_values, output, out_feats
 
         # check eligibility of saving pre-features
-        if not args.inference: raise ValueError('only support inference mode for prefeats')
-        if args.model not in ['FlowNet2', 'FlowNet2C', 'FlowNet2S']:
-            raise ValueError('only support FlowNet2, FlowNet2C, FlowNet2S')
+        # if not args.inference: raise ValueError('only support inference mode for prefeats')
+        # if args.model not in ['FlowNet2', 'FlowNet2C', 'FlowNet2S']:
+        #   raise ValueError('only support FlowNet2, FlowNet2C, FlowNet2S')
 
         model_and_loss = ModelAndLoss(args)
 
@@ -352,31 +353,13 @@ if __name__ == '__main__':
 
         model.eval()
 
-        if args.save_prefeat and args.model=='FlowNet2':
+        if args.save_prefeat:
             feat_folder = 'prefeat_kitti_odo'
             if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            feat_folder = 'prefeat_kitti_odo/FlowNet2'
+            feat_folder = 'prefeat_kitti_odo/{}'.format(args.model)
             if not os.path.exists(feat_folder): os.mkdir(feat_folder)
             for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
-                feat_folder = 'prefeat_kitti_odo/FlowNet2/{}'.format(_seq)
-                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-        
-        if args.save_prefeat and args.model=='FlowNet2C':
-            feat_folder = 'prefeat_kitti_odo'
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            feat_folder = 'prefeat_kitti_odo/FlowNet2C'
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
-                feat_folder = 'prefeat_kitti_odo/FlowNet2C/{}'.format(_seq)
-                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-        
-        if args.save_prefeat and args.model=='FlowNet2S':
-            feat_folder = 'prefeat_kitti_odo'
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            feat_folder = 'prefeat_kitti_odo/FlowNet2S'
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
-                feat_folder = 'prefeat_kitti_odo/FlowNet2S/{}'.format(_seq)
+                feat_folder = 'prefeat_kitti_odo/{}/{}'.format(args.model, _seq)
                 if not os.path.exists(feat_folder): os.mkdir(feat_folder)
         
         if args.save_flow or args.render_validation:
@@ -409,7 +392,7 @@ if __name__ == '__main__':
             # the targets are set to all zeros. thus, losses are actually L1 or L2 norms of compute optical flows, 
             # depending on the type of loss norm passed in
             with torch.no_grad():
-                losses, output = model(data[0], target[0], inference=True)
+                losses, output, out_feats = model(data[0], target[0], inference=True)
 
             losses = [torch.mean(loss_value) for loss_value in losses] 
             loss_val = losses[0] # Collect first loss for weight update
@@ -421,6 +404,10 @@ if __name__ == '__main__':
 
             statistics.append(loss_values)
             # import IPython; IPython.embed()
+
+            if args.save_prefeat:
+                torch.save(out_feats, 'prefeat_kitti_odo/{}/{}/{}.pt'.format(args.model, outseq, outname))
+
             if args.save_flow or args.render_validation:
                 for i in range(args.inference_batch_size):
                     _pflow = output[i].data.cpu().numpy().transpose(1, 2, 0)

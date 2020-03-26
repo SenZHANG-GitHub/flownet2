@@ -1,3 +1,4 @@
+import pdb
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -37,6 +38,7 @@ class FlowNet2(nn.Module):
         self.args = args
 
         self.channelnorm = ChannelNorm()
+        pdb.set_trace()
 
         # First Block (FlowNetC)
         self.flownetc = FlowNetC.FlowNetC(args, batchNorm=self.batchNorm)
@@ -183,16 +185,16 @@ class FlowNet2(nn.Module):
         #     flownetfusion_flow.register_hook(save_grad(self.args.grads, 'flownetfusion_flow'))
         
         out_feats = {
-            'flownetc_flow2':        flownetc_flow2,
-            'concat1':               concat1,
-            'flownets1_flow2':       flownets1_flow2,
-            'concat2':               concat2,
-            'flownets2_flow2':       flownets2_flow2,
-            'concat3':               concat3,
-            'fusion_out_conv2':      fusion_out_conv2,
-            'fusion_flow2':          fusion_flow2,
-            'fusion_concat0':        fusion_concat0,
-            'fusion_out_interconv0': fusion_out_interconv0
+            'flownetc_flow2':        flownetc_flow2.data.cpu(),
+            'concat1':               concat1.data.cpu(),
+            'flownets1_flow2':       flownets1_flow2.data.cpu(),
+            'concat2':               concat2.data.cpu(),
+            'flownets2_flow2':       flownets2_flow2.data.cpu(),
+            'concat3':               concat3.data.cpu(),
+            'fusion_out_conv2':      fusion_out_conv2.data.cpu(),
+            'fusion_flow2':          fusion_flow2.data.cpu(),
+            'fusion_concat0':        fusion_concat0.data.cpu(),
+            'fusion_out_interconv0': fusion_out_interconv0.data.cpu()
         }
 
         return flownetfusion_flow, out_feats
@@ -266,12 +268,12 @@ class FlowNet2C(FlowNetC.FlowNetC):
             return flow2,flow3,flow4,flow5,flow6
         else:
             out_feats = {
-                'out_conv6':    out_conv6,
-                'out_conv6_1':  out_conv6_1,
-                'flow6':        flow6,
-                'flow6_up':     flow6_up,
-                'concat2':      concat2,
-                'flow2':        flow2
+                'out_conv6':    out_conv6.data.cpu(),
+                'out_conv6_1':  out_conv6_1.data.cpu(),
+                'flow6':        flow6.data.cpu(),
+                'flow6_up':     flow6_up.data.cpu(),
+                'concat2':      concat2.data.cpu(),
+                'flow2':        flow2.data.cpu()
             }
             return self.upsample1(flow2*self.div_flow), out_feats
 
@@ -321,12 +323,12 @@ class FlowNet2S(FlowNetS.FlowNetS):
             return flow2,flow3,flow4,flow5,flow6
         else:
             out_feats = {
-                'out_conv6':   out_conv6,
-                'out_conv6_1': out_conv6_1,
-                'flow6':       flow6,
-                'flow6_up':    flow6_up,
-                'concat2':     concat2,
-                'flow2':       flow2
+                'out_conv6':   out_conv6.data.cpu(),
+                'out_conv6_1': out_conv6_1.data.cpu(),
+                'flow6':       flow6.data.cpu(),
+                'flow6_up':    flow6_up.data.cpu(),
+                'concat2':     concat2.data.cpu(),
+                'flow2':       flow2.data.cpu()
             }
             return self.upsample1(flow2*self.div_flow), out_feats
 

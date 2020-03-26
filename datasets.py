@@ -10,6 +10,7 @@ from glob import glob
 import utils.frame_utils as frame_utils
 
 from scipy.misc import imread, imresize
+from timeit import default_timer as timer
 
 class StaticRandomCrop(object):
     def __init__(self, image_size, crop_size):
@@ -369,7 +370,14 @@ class ImagesFromFolder(data.Dataset):
     images = list(map(cropper, images))
     
     images = np.array(images).transpose(3,0,1,2)
+
+    tmp_time = timer()
     images = torch.from_numpy(images.astype(np.float32))
+    tout = timer() - tmp_time
+    print('*********************')
+    print('to torch time: {} s'.format(tout))
+    print('*********************')
+
 
     return [images], [torch.zeros(images.size()[0:1] + (2,) + images.size()[-2:])], [out_name]
 
