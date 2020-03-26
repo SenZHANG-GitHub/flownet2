@@ -173,7 +173,7 @@ if __name__ == '__main__':
                 
             def forward(self, data, target, inference=False ):
                 # out_feats: dict of pretrained features to save
-                pdb.set_trace() # data.shape: torch.Size([1,3,2,320,1216])
+                # pdb.set_trace() # data.shape: torch.Size([1,3,2,320,1216])
                 output, out_feats = self.model(data)
                 loss_values = self.loss(output, target)
 

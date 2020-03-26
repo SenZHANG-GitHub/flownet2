@@ -38,7 +38,6 @@ class FlowNet2(nn.Module):
         self.args = args
 
         self.channelnorm = ChannelNorm()
-        pdb.set_trace()
 
         # First Block (FlowNetC)
         self.flownetc = FlowNetC.FlowNetC(args, batchNorm=self.batchNorm)
