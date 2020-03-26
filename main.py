@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
                 if not inference :
                     return loss_values
-                else :
+                else : # inference
                     return loss_values, output, out_feats
 
         # check eligibility of saving pre-features
@@ -353,14 +353,14 @@ if __name__ == '__main__':
 
         model.eval()
 
-        if args.save_prefeat:
-            feat_folder = 'prefeat_kitti_odo'
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            feat_folder = 'prefeat_kitti_odo/{}'.format(args.model)
-            if not os.path.exists(feat_folder): os.mkdir(feat_folder)
-            for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
-                feat_folder = 'prefeat_kitti_odo/{}/{}'.format(args.model, _seq)
-                if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+        # if args.save_prefeat:
+        #     feat_folder = 'prefeat_kitti_odo'
+        #     if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+        #     feat_folder = 'prefeat_kitti_odo/{}'.format(args.model)
+        #     if not os.path.exists(feat_folder): os.mkdir(feat_folder)
+        #     for _seq in ['00', '01', '02', '04', '05', '06', '07', '08', '09', '10']:
+        #         feat_folder = 'prefeat_kitti_odo/{}/{}'.format(args.model, _seq)
+        #         if not os.path.exists(feat_folder): os.mkdir(feat_folder)
         
         if args.save_flow or args.render_validation:
             flow_folder = "{}/inference/{}.epoch-{}-flow-field".format(args.save,args.name.replace('/', '.'),epoch)
@@ -381,9 +381,9 @@ if __name__ == '__main__':
         statistics = []
         total_loss = 0
         for batch_idx, (data, target, outname) in enumerate(progress):
-            # outname: e.g. [['00-000000_000001']]
-            outname = outname[0][0] # '00-000000_000001'
-            outseq  = outname.split('-')[0] # '00'
+            # # outname: e.g. [['00-000000_000001']]
+            # outname = outname[0][0] # '00-000000_000001'
+            # outseq  = outname.split('-')[0] # '00'
             if args.cuda:
                 data, target = [d.cuda(non_blocking=True) for d in data], [t.cuda(non_blocking=True) for t in target]
             data, target = [Variable(d) for d in data], [Variable(t) for t in target]
@@ -405,8 +405,8 @@ if __name__ == '__main__':
             statistics.append(loss_values)
             # import IPython; IPython.embed()
 
-            if args.save_prefeat:
-                torch.save(out_feats, 'prefeat_kitti_odo/{}/{}/{}.pt'.format(args.model, outseq, outname))
+            # if args.save_prefeat:
+            #     torch.save(out_feats, 'prefeat_kitti_odo/{}/{}/{}.pt'.format(args.model, outseq, outname))
 
             if args.save_flow or args.render_validation:
                 for i in range(args.inference_batch_size):

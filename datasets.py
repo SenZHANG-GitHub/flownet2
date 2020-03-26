@@ -371,12 +371,12 @@ class ImagesFromFolder(data.Dataset):
     
     images = np.array(images).transpose(3,0,1,2)
 
-    tmp_time = timer()
+    # tmp_time = timer()
     images = torch.from_numpy(images.astype(np.float32))
-    tout = timer() - tmp_time
-    print('*********************')
-    print('to torch time: {} s'.format(tout))
-    print('*********************')
+    # tout = timer() - tmp_time
+    # print('*********************')
+    # print('to torch time: {} s'.format(tout))
+    # print('*********************')
 
 
     return [images], [torch.zeros(images.size()[0:1] + (2,) + images.size()[-2:])], [out_name]
